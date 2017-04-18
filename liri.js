@@ -5,9 +5,25 @@ const Twitter = require("twitter");
 const spotify = require("spotify");
 const request = require("request");
 
+var whatArgs = process.argv;
 
 var action = process.argv[2];
-var what = process.argv[3];
+var what = "";
+
+for (var i = 3; i < whatArgs.length; i++) {
+
+  if (i > 3 && i < whatArgs.length) {
+
+    what = what + "+" + whatArgs[i];
+
+  }
+
+  else {
+
+    what += whatArgs[i];
+
+  }
+}
 
 
 
@@ -25,7 +41,7 @@ switch (action) {
     break;
 
   case "do-what-it-says":
-    WhatSays();
+    WhatItSays();
     break;
 }
 
@@ -33,7 +49,13 @@ function logSpotify(){
 
 	var songName = what;
 
-	console.log("loging song name: ", songName);
+	console.log("Song requested: ", songName);
+
+	if (songName === "") {
+   songName = 'The Sign Ace of Base';
+  }
+
+	
 
 	spotify.search({ type: 'track', query: songName }, function(err, data) {
     if ( err ) {
@@ -47,11 +69,12 @@ function logSpotify(){
     for (var i = 0; i < songs.length; i++) {
       spotifyData.push({
         'song name: ': songs[i].name,
+        'artist: ': songs[i].artists[0].name, 
         'preview song: ': songs[i].preview_url,
         'album: ': songs[i].album.name,
       });
     }
-    console.log(data);
+    console.log(spotifyData);
     });
 }
 
@@ -83,8 +106,8 @@ function movieThis(){
 	movieName = what;
 	console.log("this is the movie requested: ", movieName);
 
- if (movieName === undefined) {
-    movieName = 'Mr Nobody';
+ if (movieName === "") {
+    movieName = 'Mr-Nobody';
   }
 
   var url = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&r=json";
@@ -112,19 +135,32 @@ function movieThis(){
 
 }
 
-function WhatSays() {
+function WhatItSays() {
   fs.readFile("random.txt", "utf8", function(error, data) {
     console.log(data);
     
-    var dataArr = data.split(',')
+    var dataArray = data.split(',');
 
-    if (dataArr.length == 2) {
-      pick(dataArr[0], dataArr[1]);
-    } else if (dataArr.length == 1) {
-      pick(dataArr[0]);
+    console.log(dataArray);
+
+    action = dataArray[0];
+    what = dataArray[1];
+
+    if (action === "my-tweets"){
+    	logTweets();
+    }
+    if (action === "spotify-this-song"){
+    	logSpotify();
+    }
+    if (action === "movie-this"){
+    	movieThis();
     }
 
-  });
+});
+   }
+   
+ 
 
-}
+
+
 
